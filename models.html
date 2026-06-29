@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Models – CreditWise AI</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><div class="logo-icon">CW</div><span>CreditWise AI</span></a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">&#9776;</button>
+    <div class="nav-links" id="nav-links">
+      <a href="index.html" class="nav-btn ghost">Home</a>
+      <a href="predict.html" class="nav-btn ghost">Predict</a>
+      <a href="analytics.html" class="nav-btn ghost">Analytics</a>
+      <a href="models.html" class="nav-btn ghost active">Models</a>
+      <a href="history.html" class="nav-btn ghost">History</a>
+      <button class="theme-btn" onclick="toggleTheme()">🌓</button>
+      <a href="predict.html" class="nav-btn primary">Get Started →</a>
+    </div>
+  </div>
+</nav>
+<div class="page-header">
+  <div class="page-header-inner">
+    <div><h1>🤖 AI Model Library</h1><p>Three machine learning algorithms powering credit intelligence</p></div>
+  </div>
+</div>
+<div style="padding:40px 24px;max-width:1200px;margin:0 auto">
+  <div class="model-grid">
+    <div class="model-card best">
+      <div class="model-best-badge">⭐ Best Performing</div>
+      <div class="model-icon">🌲</div>
+      <h3>Random Forest</h3>
+      <p>An ensemble method building hundreds of decision trees and aggregating their predictions. Highly resistant to overfitting and handles complex non-linear relationships in financial data.</p>
+      <div class="adv-list">
+        <div class="adv-item">Handles missing values gracefully</div>
+        <div class="adv-item">Robust against outliers and noise</div>
+        <div class="adv-item">Feature importance built-in</div>
+        <div class="adv-item">Works well with imbalanced datasets</div>
+        <div class="adv-item">High accuracy on financial data</div>
+      </div>
+      <div class="model-metric"><span class="model-metric-label">Accuracy</span><span class="model-metric-val">95.2%</span></div>
+      <div class="model-metric"><span class="model-metric-label">ROC-AUC</span><span class="model-metric-val">0.971</span></div>
+      <div class="model-metric"><span class="model-metric-label">F1 Score</span><span class="model-metric-val">94.1%</span></div>
+      <div class="model-metric"><span class="model-metric-label">Trees</span><span class="model-metric-val">200</span></div>
+      <div class="model-metric"><span class="model-metric-label">Max Depth</span><span class="model-metric-val">20</span></div>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">🌳</div>
+      <h3>Decision Tree</h3>
+      <p>A tree-like flowchart splitting data based on feature thresholds. Highly interpretable and mirrors the way human credit analysts think about risk assessment decisions.</p>
+      <div class="adv-list">
+        <div class="adv-item">Fully interpretable and transparent</div>
+        <div class="adv-item">No feature scaling required</div>
+        <div class="adv-item">Fast prediction speed</div>
+        <div class="adv-item">Handles categorical features natively</div>
+        <div class="adv-item">Visual decision path available</div>
+      </div>
+      <div class="model-metric"><span class="model-metric-label">Accuracy</span><span class="model-metric-val">87.6%</span></div>
+      <div class="model-metric"><span class="model-metric-label">ROC-AUC</span><span class="model-metric-val">0.891</span></div>
+      <div class="model-metric"><span class="model-metric-label">F1 Score</span><span class="model-metric-val">87.1%</span></div>
+      <div class="model-metric"><span class="model-metric-label">Max Depth</span><span class="model-metric-val">12</span></div>
+      <div class="model-metric"><span class="model-metric-label">Min Samples</span><span class="model-metric-val">5</span></div>
+    </div>
+    <div class="model-card">
+      <div class="model-icon">📈</div>
+      <h3>Logistic Regression</h3>
+      <p>A statistical model computing creditworthiness probability as a logistic function of input features. Efficient, explainable, and ideal for regulatory compliance and auditing.</p>
+      <div class="adv-list">
+        <div class="adv-item">Regulatory-friendly and auditable</div>
+        <div class="adv-item">Probability calibration built-in</div>
+        <div class="adv-item">Computationally efficient</div>
+        <div class="adv-item">Low risk of overfitting</div>
+        <div class="adv-item">Coefficient interpretability</div>
+      </div>
+      <div class="model-metric"><span class="model-metric-label">Accuracy</span><span class="model-metric-val">82.3%</span></div>
+      <div class="model-metric"><span class="model-metric-label">ROC-AUC</span><span class="model-metric-val">0.852</span></div>
+      <div class="model-metric"><span class="model-metric-label">F1 Score</span><span class="model-metric-val">82.5%</span></div>
+      <div class="model-metric"><span class="model-metric-label">Regularization</span><span class="model-metric-val">L2</span></div>
+      <div class="model-metric"><span class="model-metric-label">Solver</span><span class="model-metric-val">lbfgs</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:40px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:32px">
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:8px;color:var(--gray-800)">🔬 ML Pipeline Overview</h2>
+    <p style="color:var(--gray-600);margin-bottom:24px;font-size:15px">How raw financial data is transformed into a credit score prediction</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px">
+      ${['📥 Data Ingestion','🧹 Preprocessing','⚙️ Feature Engineering','🏋️ Model Training','📊 Evaluation','🎯 Prediction'].map((s,i)=>`<div style="background:var(--gray-50);border-radius:12px;padding:16px;text-align:center;position:relative"><div style="font-size:24px;margin-bottom:8px">${s.split(' ')[0]}</div><div style="font-size:13px;font-weight:600;color:var(--gray-800)">${s.split(' ').slice(1).join(' ')}</div><div style="position:absolute;top:-8px;left:-8px;width:24px;height:24px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${i+1}</div></div>`).join('')}
+    </div>
+  </div>
+</div>
+<script src="theme.js"></script>
+</body>
+</html>

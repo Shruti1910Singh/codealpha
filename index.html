@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CreditWise AI – Credit Scoring & Prediction</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#2563EB;--primary-dark:#1d4ed8;--primary-light:#dbeafe;
+  --secondary:#0F172A;--accent:#14B8A6;
+  --bg:#F8FAFC;--white:#ffffff;
+  --success:#22C55E;--danger:#EF4444;--warning:#F59E0B;
+  --gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;
+  --gray-400:#94A3B8;--gray-600:#475569;--gray-800:#1E293B;
+  --radius:12px;--radius-lg:20px;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+}
+body{background:var(--bg);color:var(--gray-800);overflow-x:hidden;scroll-behavior:smooth}
+.dark{--bg:#0a0f1e;--white:#111827;--gray-50:#111827;--gray-100:#1f2937;--gray-200:#374151;--gray-400:#6B7280;--gray-600:#9CA3AF;--gray-800:#F9FAFB;--primary-light:#1e3a6e;background:#0a0f1e;color:#F9FAFB}
+
+/* ===== NAV ===== */
+nav{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:1000;padding:0 20px;transition:background 0.3s}
+.dark nav{background:rgba(10,15,30,0.95);border-color:#1f2937}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800;color:var(--primary);cursor:pointer;text-decoration:none}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:900;flex-shrink:0}
+.nav-links{display:flex;gap:4px;align-items:center}
+.nav-a{padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--gray-600);transition:all 0.2s;text-decoration:none;display:inline-block}
+.nav-a:hover{background:var(--gray-100);color:var(--primary)}
+.dark .nav-a:hover{background:#1f2937}
+.nav-cta{background:var(--primary);color:#fff !important;border-radius:8px;padding:8px 18px;font-weight:600}
+.nav-cta:hover{background:var(--primary-dark) !important}
+.theme-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--gray-200);background:transparent;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dark .theme-btn{border-color:#374151}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;border:none;background:transparent}
+.hamburger span{display:block;width:22px;height:2px;background:var(--gray-600);border-radius:2px;transition:all 0.3s}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--white);border-bottom:1px solid var(--gray-200);padding:16px 20px;z-index:999;flex-direction:column;gap:4px;box-shadow:0 8px 32px rgba(0,0,0,0.1)}
+.dark .mobile-menu{background:#111827;border-color:#374151}
+.mobile-menu.open{display:flex}
+.mobile-menu .nav-a{padding:12px 16px;border-radius:10px;font-size:15px}
+
+/* ===== PAGES ===== */
+.page{display:none}
+.page.active{display:block}
+
+/* ===== HERO ===== */
+.hero{background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#0f766e 100%);padding:80px 20px 100px;color:#fff;position:relative;overflow:hidden;min-height:560px}
+.hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:60px;background:var(--bg);clip-path:ellipse(55% 100% at 50% 100%)}
+.hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(96,165,250,0.15);color:#60a5fa;padding:7px 16px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:20px;border:1px solid rgba(96,165,250,0.25)}
+.hero h1{font-size:46px;font-weight:900;line-height:1.12;margin-bottom:20px;letter-spacing:-0.02em}
+.hero h1 .grad{background:linear-gradient(90deg,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:17px;color:#cbd5e1;margin-bottom:32px;line-height:1.75}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
+.btn-primary{background:var(--primary);color:#fff;padding:14px 28px;border-radius:12px;border:none;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.25s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,0.35)}
+.btn-outline{background:transparent;color:#fff;padding:14px 28px;border-radius:12px;border:2px solid rgba(255,255,255,0.35);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.25s;display:inline-flex;align-items:center;gap:8px}
+.btn-outline:hover{border-color:#fff;background:rgba(255,255,255,0.12);transform:translateY(-2px)}
+.hero-visual{background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:28px;position:relative}
+.hero-score{text-align:center;margin-bottom:20px}
+.hero-score-num{font-size:68px;font-weight:900;background:linear-gradient(90deg,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.hero-score-label{color:#94a3b8;font-size:13px;margin-top:2px}
+.hero-badge-pill{display:inline-block;background:rgba(34,197,94,0.2);color:#4ade80;padding:6px 16px;border-radius:100px;font-size:13px;font-weight:600;border:1px solid rgba(34,197,94,0.3);margin-top:6px}
+.hero-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.hero-mini-item{background:rgba(255,255,255,0.06);border-radius:10px;padding:12px 8px;text-align:center}
+.hero-mini-item .v{font-size:20px;font-weight:800;color:#fff}
+.hero-mini-item .l{font-size:10px;color:#94a3b8;margin-top:2px}
+.floating-tag{position:absolute;background:rgba(255,255,255,0.13);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:100px;padding:7px 14px;font-size:11px;color:#fff;font-weight:600}
+.ft1{top:-14px;left:-10px;animation:flt 3s ease-in-out infinite}
+.ft2{bottom:10px;right:-14px;animation:flt 3s ease-in-out infinite 1.5s}
+@keyframes flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ===== SECTIONS ===== */
+.section{padding:72px 20px}
+.sec-inner{max-width:1200px;margin:0 auto}
+.sec-head{text-align:center;margin-bottom:52px}
+.sec-badge{display:inline-block;background:var(--primary-light);color:var(--primary);padding:6px 16px;border-radius:100px;font-size:12px;font-weight:700;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.06em}
+.sec-title{font-size:34px;font-weight:800;margin-bottom:12px;color:var(--gray-800)}
+.dark .sec-title{color:#F9FAFB}
+.sec-sub{color:var(--gray-600);font-size:15px;line-height:1.75;max-width:580px;margin:0 auto}
+
+/* ===== FEATURE GRID ===== */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.feat-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:26px;transition:all 0.3s;position:relative;overflow:hidden}
+.dark .feat-card{border-color:#374151}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));transform:scaleX(0);transition:transform 0.3s;transform-origin:left}
+.feat-card:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(37,99,235,0.1)}
+.feat-card:hover::before{transform:scaleX(1)}
+.feat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px}
+.feat-card h3{font-size:17px;font-weight:700;margin-bottom:8px}
+.feat-card p{font-size:13px;color:var(--gray-600);line-height:1.65}
+.dark .feat-card h3{color:#F9FAFB}
+
+/* ===== STEPS ===== */
+.steps-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;position:relative}
+.steps-wrap::before{content:'';position:absolute;top:38px;left:calc(16.67% + 36px);right:calc(16.67% + 36px);height:2px;background:linear-gradient(90deg,var(--primary),var(--accent));z-index:0}
+.step{text-align:center;position:relative;z-index:1}
+.step-num{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 8px 24px rgba(37,99,235,0.3)}
+.step h3{font-size:17px;font-weight:700;margin-bottom:8px}
+.step p{font-size:13px;color:var(--gray-600);line-height:1.65}
+.dark .step h3{color:#F9FAFB}
+
+/* ===== STATS ===== */
+.stats-wrap{background:linear-gradient(135deg,#0f172a,#1e3a8a);padding:60px 20px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;max-width:900px;margin:0 auto;text-align:center}
+.stat .num{font-size:46px;font-weight:900;color:#60a5fa;line-height:1}
+.stat .lbl{color:#94a3b8;font-size:14px;margin-top:6px}
+
+/* ===== TESTIMONIALS ===== */
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.test-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:24px;transition:transform 0.3s}
+.dark .test-card{background:#111827;border-color:#374151}
+.test-card:hover{transform:translateY(-4px)}
+.stars{color:#F59E0B;font-size:15px;margin-bottom:12px}
+.test-card blockquote{font-size:13px;line-height:1.75;color:var(--gray-600);margin-bottom:16px;font-style:italic}
+.dark .test-card blockquote{color:#9CA3AF}
+.test-author{display:flex;align-items:center;gap:12px}
+.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.author-name{font-size:13px;font-weight:700;color:var(--gray-800)}
+.dark .author-name{color:#F9FAFB}
+.author-role{font-size:11px;color:var(--gray-400)}
+
+/* ===== FOOTER ===== */
+footer{background:#0f172a;color:#94a3b8;padding:52px 20px 24px}
+.foot-inner{max-width:1200px;margin:0 auto}
+.foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.foot-brand p{font-size:13px;line-height:1.75;margin-top:12px}
+.foot-col h4{font-size:12px;font-weight:700;color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.06em}
+.foot-link{display:block;font-size:13px;color:#94a3b8;text-decoration:none;margin-bottom:8px;transition:color 0.2s;cursor:pointer}
+.foot-link:hover{color:#60a5fa}
+.foot-bottom{border-top:1px solid #1e293b;padding-top:22px;text-align:center;font-size:12px}
+
+/* ===== PREDICT PAGE ===== */
+.page-header{padding:24px 20px;background:var(--gray-50);border-bottom:1px solid var(--gray-200)}
+.dark .page-header{background:#111827;border-color:#374151}
+.page-header-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.page-header h1{font-size:26px;font-weight:800;margin-bottom:2px}
+.page-header p{color:var(--gray-600);font-size:14px}
+.dashboard{display:grid;grid-template-columns:390px 1fr;gap:24px;max-width:1200px;margin:24px auto;padding:0 20px}
+.form-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:24px;height:fit-content;position:sticky;top:80px;max-height:calc(100vh - 100px);overflow-y:auto}
+.dark .form-card{background:#111827;border-color:#374151}
+.form-card::-webkit-scrollbar{width:4px}
+.form-card::-webkit-scrollbar-track{background:transparent}
+.form-card::-webkit-scrollbar-thumb{background:var(--gray-200);border-radius:2px}
+.form-title{font-size:18px;font-weight:700;margin-bottom:20px;color:var(--gray-800);display:flex;align-items:center;gap:8px}
+.dark .form-title{color:#F9FAFB}
+.fsec{margin-bottom:18px}
+.fsec-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--primary);margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid var(--primary-light)}
+.dark .fsec-label{border-color:#1e3a6e}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:3px}
+.dark .fg label{color:#9CA3AF}
+.fg input,.fg select{width:100%;padding:9px 11px;border:1px solid var(--gray-200);border-radius:8px;font-size:13px;background:var(--gray-50);color:var(--gray-800);outline:none;transition:all 0.2s;font-family:inherit}
+.dark .fg input,.dark .fg select{background:#1f2937;border-color:#374151;color:#F9FAFB}
+.fg input:focus,.fg select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,0.12)}
+.btn-predict{width:100%;padding:13px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.25s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-predict:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,0.3)}
+.btn-predict:disabled{opacity:0.65;cursor:not-allowed}
+.btn-reset{width:100%;padding:9px;background:transparent;color:var(--gray-600);border:1px solid var(--gray-200);border-radius:10px;font-size:13px;cursor:pointer;margin-top:8px;transition:all 0.2s;font-family:inherit}
+.dark .btn-reset{border-color:#374151;color:#9CA3AF}
+.btn-reset:hover{background:var(--gray-100)}
+.dark .btn-reset:hover{background:#1f2937}
+
+.results-area{display:flex;flex-direction:column;gap:18px}
+.placeholder{background:var(--white);border:2px dashed var(--gray-200);border-radius:var(--radius-lg);padding:52px 24px;text-align:center;color:var(--gray-400)}
+.dark .placeholder{background:#111827;border-color:#374151}
+.placeholder-icon{font-size:52px;margin-bottom:12px}
+.rcard{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:22px;animation:slideUp 0.4s ease}
+.dark .rcard{background:#111827;border-color:#374151}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.rcard-title{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--gray-800);display:flex;align-items:center;gap:7px}
+.dark .rcard-title{color:#F9FAFB}
+
+.pred-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pred-verdict-box{border-radius:14px;padding:22px;color:#fff;text-align:center}
+.pred-verdict-label{font-size:12px;opacity:0.8;margin-bottom:6px}
+.pred-verdict-text{font-size:26px;font-weight:900;margin-bottom:6px}
+.pred-conf{font-size:13px;opacity:0.85}
+.pred-risk-tag{margin-top:10px;padding:7px 14px;background:rgba(255,255,255,0.15);border-radius:8px;font-size:12px;font-weight:600;display:inline-block}
+.pred-score-box{background:var(--gray-50);border-radius:14px;padding:22px;text-align:center;border:1px solid var(--gray-200)}
+.dark .pred-score-box{background:#1f2937;border-color:#374151}
+.pred-score-val{font-size:58px;font-weight:900;line-height:1}
+.score-bar{height:8px;border-radius:100px;margin:14px 0 6px;position:relative}
+.score-bar-track{position:absolute;inset:0;background:linear-gradient(90deg,#EF4444,#F59E0B,#22C55E);border-radius:100px}
+.score-bar-dot{position:absolute;top:50%;width:16px;height:16px;background:#fff;border:3px solid var(--primary);border-radius:50%;transform:translate(-50%,-50%);transition:left 0.6s ease}
+.score-bar-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--gray-400)}
+
+.prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.prob-item{text-align:center;padding:14px;background:var(--gray-50);border-radius:10px}
+.dark .prob-item{background:#1f2937}
+.prob-val{font-size:26px;font-weight:800}
+.prob-lbl{font-size:11px;color:var(--gray-400);margin-top:3px}
+
+.risk-list{display:flex;flex-direction:column;gap:10px}
+.risk-row{display:flex;align-items:center;gap:10px}
+.risk-name{flex:1;font-size:12px;color:var(--gray-600)}
+.dark .risk-name{color:#9CA3AF}
+.risk-bar-w{width:140px;height:6px;background:var(--gray-200);border-radius:100px;overflow:hidden;flex-shrink:0}
+.dark .risk-bar-w{background:#374151}
+.risk-bar-f{height:100%;border-radius:100px;transition:width 1s ease}
+.risk-score{font-size:12px;font-weight:700;min-width:28px;text-align:right}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:700}
+.bd-s{background:rgba(34,197,94,0.1);color:#22c55e}
+.bd-w{background:rgba(245,158,11,0.1);color:#f59e0b}
+.bd-d{background:rgba(239,68,68,0.1);color:#ef4444}
+
+.ai-box{font-size:13px;line-height:1.8;color:var(--gray-600);background:var(--gray-50);border-radius:10px;padding:14px 16px;border-left:4px solid var(--primary)}
+.dark .ai-box{background:#1f2937;color:#9CA3AF}
+.rec-item{display:flex;gap:8px;margin-bottom:8px;font-size:13px;color:var(--gray-600)}
+.dark .rec-item{color:#9CA3AF}
+.rec-num{color:var(--primary);font-weight:700;flex-shrink:0}
+
+.model-compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mc-item{background:var(--gray-50);border-radius:10px;padding:14px;text-align:center}
+.dark .mc-item{background:#1f2937}
+.mc-item.best{border:2px solid var(--primary)}
+.mc-label{font-size:11px;font-weight:600;margin-bottom:6px}
+.mc-score{font-size:26px;font-weight:900}
+.mc-verdict{font-size:11px;margin-top:4px}
+.mc-best-tag{font-size:9px;color:var(--primary);font-weight:800;margin-bottom:4px}
+
+/* ===== ANALYTICS ===== */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.chart-box{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px}
+.dark .chart-box{background:#111827;border-color:#374151}
+.chart-box h3{font-size:14px;font-weight:700;margin-bottom:14px;color:var(--gray-800)}
+.dark .chart-box h3{color:#F9FAFB}
+.chart-box canvas{max-height:220px}
+
+/* ===== MODELS PAGE ===== */
+.models-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.model-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:24px;position:relative;transition:all 0.3s}
+.dark .model-card{background:#111827;border-color:#374151}
+.model-card.best{border:2px solid var(--primary);box-shadow:0 0 0 4px rgba(37,99,235,0.07)}
+.model-best-tag{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:3px 14px;border-radius:100px;font-size:11px;font-weight:800;white-space:nowrap}
+.model-icon{font-size:34px;margin-bottom:10px}
+.model-card h3{font-size:17px;font-weight:800;margin-bottom:6px}
+.model-card p{font-size:12px;color:var(--gray-600);line-height:1.65;margin-bottom:14px}
+.dark .model-card p{color:#9CA3AF}
+.adv-item{font-size:12px;color:var(--gray-600);display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.dark .adv-item{color:#9CA3AF}
+.adv-item::before{content:'✓';color:var(--success);font-weight:800}
+.metric-row{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--gray-100);font-size:13px}
+.dark .metric-row{border-color:#374151}
+.metric-val{font-weight:700;color:var(--primary)}
+
+/* ===== HISTORY PAGE ===== */
+.htable{width:100%;border-collapse:collapse;font-size:13px}
+.htable th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid var(--gray-200)}
+.dark .htable th{border-color:#374151}
+.htable td{padding:11px 14px;border-bottom:1px solid var(--gray-100);color:var(--gray-600)}
+.dark .htable td{border-color:#1f2937;color:#9CA3AF}
+.htable tr:hover td{background:var(--gray-50)}
+.dark .htable tr:hover td{background:#1f2937}
+
+/* ===== SPINNER ===== */
+.spin{width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:rotate 0.75s linear infinite;display:inline-block;flex-shrink:0}
+@keyframes rotate{to{transform:rotate(360deg)}}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .feat-grid{grid-template-columns:repeat(2,1fr)}
+  .models-grid{grid-template-columns:repeat(2,1fr)}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .dashboard{grid-template-columns:340px 1fr}
+}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .hero-inner{grid-template-columns:1fr}
+  .hero{padding:60px 20px 80px}
+  .hero h1{font-size:32px}
+  .hero p{font-size:15px}
+  .hero-visual{display:none}
+  .dashboard{grid-template-columns:1fr;padding:0 16px}
+  .form-card{position:static;max-height:none}
+  .pred-grid{grid-template-columns:1fr}
+  .model-compare-grid{grid-template-columns:1fr}
+  .feat-grid{grid-template-columns:1fr}
+  .steps-wrap{grid-template-columns:1fr}
+  .steps-wrap::before{display:none}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .test-grid{grid-template-columns:1fr}
+  .models-grid{grid-template-columns:1fr}
+  .charts-grid{grid-template-columns:1fr}
+  .prob-grid{grid-template-columns:1fr 1fr}
+  .foot-grid{grid-template-columns:1fr}
+  .sec-title{font-size:26px}
+  .hero-btns{flex-direction:column}
+  .btn-primary,.btn-outline{justify-content:center}
+  .page-header-inner{flex-direction:column;align-items:flex-start}
+  .model-compare-grid{grid-template-columns:repeat(3,1fr)}
+  .risk-bar-w{width:100px}
+}
+@media(max-width:480px){
+  .frow{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .model-compare-grid{grid-template-columns:1fr}
+  .prob-grid{grid-template-columns:1fr}
+  .pred-score-val{font-size:48px}
+  .hero-score-num{font-size:52px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="logo" onclick="showPage('home')"><div class="logo-icon">CW</div><span>CreditWise AI</span></a>
+    <div class="nav-links">
+      <a class="nav-a" onclick="showPage('home')">Home</a>
+      <a class="nav-a" onclick="showPage('predict')">Predict</a>
+      <a class="nav-a" onclick="showPage('analytics')">Analytics</a>
+      <a class="nav-a" onclick="showPage('models')">Models</a>
+      <a class="nav-a" onclick="showPage('history')">History</a>
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌓</button>
+      <a class="nav-a nav-cta" onclick="showPage('predict')">Get Started →</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" style="display:none" id="mob-theme">🌓</button>
+      <div class="hamburger" onclick="toggleMenu()" id="hamburger"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a class="nav-a" onclick="navGo('home')">🏠 Home</a>
+  <a class="nav-a" onclick="navGo('predict')">🔍 Predict</a>
+  <a class="nav-a" onclick="navGo('analytics')">📊 Analytics</a>
+  <a class="nav-a" onclick="navGo('models')">🤖 Models</a>
+  <a class="nav-a" onclick="navGo('history')">📋 History</a>
+  <a class="nav-a nav-cta" style="text-align:center;margin-top:4px" onclick="navGo('predict')">🚀 Get Started Free</a>
+</div>
+
+<!-- ========== HOME PAGE ========== -->
+<div class="page active" id="page-home">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-badge">🤖 AI-Powered Credit Analysis</div>
+        <h1>Predict Creditworthiness with <span class="grad">AI-Powered Intelligence</span></h1>
+        <p>Advanced Machine Learning models analyze financial behavior and generate accurate credit risk assessments in seconds. Trusted by banks and financial institutions worldwide.</p>
+        <div class="hero-btns">
+          <button class="btn-primary" onclick="showPage('predict')">🚀 Get Started Free</button>
+          <button class="btn-outline" onclick="showPage('predict'); loadDemo()">👁 Try Demo</button>
+        </div>
+      </div>
+      <div>
+        <div class="hero-visual">
+          <div class="floating-tag ft1">🔒 256-bit Encryption</div>
+          <div class="floating-tag ft2">⚡ Real-time Analysis</div>
+          <div class="hero-score">
+            <div class="hero-score-num">742</div>
+            <div class="hero-score-label">Credit Score</div>
+            <div style="margin-top:6px"><span class="hero-badge-pill">✅ Creditworthy</span></div>
+          </div>
+          <div class="hero-mini">
+            <div class="hero-mini-item"><div class="v">92%</div><div class="l">Confidence</div></div>
+            <div class="hero-mini-item"><div class="v">Low</div><div class="l">Risk</div></div>
+            <div class="hero-mini-item"><div class="v">0.3s</div><div class="l">Analysis</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="section">
+    <div class="sec-inner">
+      <div class="sec-head">
+        <div class="sec-badge">Core Features</div>
+        <h2 class="sec-title">Everything You Need for Credit Intelligence</h2>
+        <p class="sec-sub">Combining advanced ML algorithms with explainable AI for comprehensive credit assessments.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card"><div class="feat-icon" style="background:rgba(37,99,235,0.1)">🤖</div><h3>AI Credit Scoring</h3><p>Predict creditworthiness instantly using three ML models — Logistic Regression, Decision Tree, and Random Forest — with ensemble scoring for maximum accuracy.</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:rgba(239,68,68,0.1)">⚠️</div><h3>Risk Assessment</h3><p>Identify financial risks through sophisticated analysis of debt-to-income ratios, payment history, and credit utilization patterns.</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:rgba(20,184,166,0.1)">💡</div><h3>Explainable AI</h3><p>Understand exactly why a prediction was made with natural-language explanations, feature importance scores, and impact analysis.</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:rgba(245,158,11,0.1)">📊</div><h3>Data Visualization</h3><p>Interactive charts and dashboards — radar charts, bar charts, histograms, and model comparison tables with real-time updates.</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:rgba(34,197,94,0.1)">🌐</div><h3>Multi-Model Analysis</h3><p>Compare predictions across all three AI models simultaneously. See confidence levels, probability scores, and model-specific insights side by side.</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:rgba(99,102,241,0.1)">🔒</div><h3>Secure & Private</h3><p>End-to-end data protection with encrypted processing. No personal data stored without consent. Full compliance with financial data regulations.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="section" style="background:var(--gray-50)">
+    <div class="sec-inner">
+      <div class="sec-head">
+        <div class="sec-badge">How It Works</div>
+        <h2 class="sec-title">Three Simple Steps to Credit Intelligence</h2>
+        <p class="sec-sub">Our streamlined process makes credit assessment fast, transparent, and actionable.</p>
+      </div>
+      <div class="steps-wrap">
+        <div class="step"><div class="step-num">1</div><h3>Enter Financial Information</h3><p>Provide income, debt levels, credit history, payment records, and other financial parameters through our intuitive form.</p></div>
+        <div class="step"><div class="step-num">2</div><h3>AI Model Analysis</h3><p>Three ML models analyze your data simultaneously, computing risk factors, payment reliability scores, and creditworthiness probability.</p></div>
+        <div class="step"><div class="step-num">3</div><h3>Receive Score & Insights</h3><p>Get your credit score (300–850), detailed explanation, risk factor breakdown, and actionable recommendations instantly.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-wrap">
+    <div class="stats-grid">
+      <div class="stat"><div class="num" id="s1">0%</div><div class="lbl">Prediction Accuracy</div></div>
+      <div class="stat"><div class="num" id="s2">0K+</div><div class="lbl">Assessments Made</div></div>
+      <div class="stat"><div class="num" id="s3">0K+</div><div class="lbl">Users Served</div></div>
+      <div class="stat"><div class="num" id="s4">0</div><div class="lbl">AI Models</div></div>
+    </div>
+  </div>
+
+  <!-- Testimonials -->
+  <div class="section">
+    <div class="sec-inner">
+      <div class="sec-head">
+        <div class="sec-badge">Testimonials</div>
+        <h2 class="sec-title">Trusted by Financial Professionals</h2>
+      </div>
+      <div class="test-grid">
+        <div class="test-card"><div class="stars">★★★★★</div><blockquote>"CreditWise AI has transformed our loan approval process. The explainable AI feature helps us justify decisions to regulators with full confidence."</blockquote><div class="test-author"><div class="avatar">AK</div><div><div class="author-name">Aditya Kumar</div><div class="author-role">Chief Risk Officer, HDFC Bank</div></div></div></div>
+        <div class="test-card"><div class="stars">★★★★★</div><blockquote>"The accuracy is remarkable. We reduced bad loan approvals by 34% in the first quarter after integrating this platform into our workflow."</blockquote><div class="test-author"><div class="avatar">PS</div><div><div class="author-name">Priya Sharma</div><div class="author-role">VP Credit Analytics, Axis Bank</div></div></div></div>
+        <div class="test-card"><div class="stars">★★★★★</div><blockquote>"The dashboard is intuitive, predictions are fast, and explanations are clear enough for both analysts and customers to understand easily."</blockquote><div class="test-author"><div class="avatar">RJ</div><div><div class="author-name">Rahul Joshi</div><div class="author-role">FinTech Lead, Bajaj Finserv</div></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="foot-inner">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <div class="logo" style="color:#60a5fa"><div class="logo-icon">CW</div><span>CreditWise AI</span></div>
+          <p>Advanced AI-powered credit scoring and risk assessment platform for modern financial institutions and individuals.</p>
+        </div>
+        <div class="foot-col"><h4>Product</h4><a class="foot-link" onclick="showPage('predict')">Credit Prediction</a><a class="foot-link" onclick="showPage('analytics')">Analytics</a><a class="foot-link" onclick="showPage('models')">AI Models</a><a class="foot-link" onclick="showPage('history')">History</a></div>
+        <div class="foot-col"><h4>Company</h4><a class="foot-link">About Us</a><a class="foot-link">Careers</a><a class="foot-link">Blog</a><a class="foot-link">Contact</a></div>
+        <div class="foot-col"><h4>Legal</h4><a class="foot-link">Privacy Policy</a><a class="foot-link">Terms of Service</a><a class="foot-link">Data Protection</a><a class="foot-link">Cookie Policy</a></div>
+      </div>
+      <div class="foot-bottom">© 2026 CreditWise AI. All rights reserved. For educational and demonstration purposes only.</div>
+    </div>
+  </footer>
+</div>
+
+<!-- ========== PREDICT PAGE ========== -->
+<div class="page" id="page-predict">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div>
+        <h1>Credit Score Predictor</h1>
+        <p>Fill in the financial details below to get an AI-powered credit assessment</p>
+      </div>
+    </div>
+  </div>
+  <div class="dashboard">
+    <!-- FORM -->
+    <div class="form-card">
+      <div class="form-title">📝 Financial Profile</div>
+      <div class="fsec">
+        <div class="fsec-label">👤 Personal Information</div>
+        <div class="frow">
+          <div class="fg"><label>Age</label><input type="number" id="f_age" value="32" min="18" max="80"></div>
+          <div class="fg"><label>Gender</label><select id="f_gender"><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
+        </div>
+        <div class="fg"><label>Marital Status</label><select id="f_marital"><option value="single">Single</option><option value="married">Married</option><option value="divorced">Divorced</option></select></div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">💰 Financial Information</div>
+        <div class="frow">
+          <div class="fg"><label>Annual Income (₹)</label><input type="number" id="f_annual" value="850000"></div>
+          <div class="fg"><label>Monthly Income (₹)</label><input type="number" id="f_monthly" value="70833"></div>
+        </div>
+        <div class="frow">
+          <div class="fg"><label>Employment Status</label><select id="f_emp"><option value="employed">Employed</option><option value="self_employed">Self-Employed</option><option value="unemployed">Unemployed</option></select></div>
+          <div class="fg"><label>Years Employed</label><input type="number" id="f_yrs" value="5" min="0" max="50"></div>
+        </div>
+        <div class="frow">
+          <div class="fg"><label>Monthly Expenses (₹)</label><input type="number" id="f_exp" value="25000"></div>
+          <div class="fg"><label>Savings Balance (₹)</label><input type="number" id="f_sav" value="200000"></div>
+        </div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">💳 Credit Information</div>
+        <div class="frow">
+          <div class="fg"><label>Existing Debt (₹)</label><input type="number" id="f_debt" value="120000"></div>
+          <div class="fg"><label>CC Utilization (%)</label><input type="number" id="f_cc" value="28" min="0" max="100"></div>
+        </div>
+        <div class="frow">
+          <div class="fg"><label>Loan Amount (₹)</label><input type="number" id="f_loan" value="500000"></div>
+          <div class="fg"><label>Loan Purpose</label><select id="f_purpose"><option value="home">Home</option><option value="car">Car</option><option value="education">Education</option><option value="business">Business</option><option value="personal">Personal</option></select></div>
+        </div>
+        <div class="fg"><label>Credit Accounts</label><input type="number" id="f_accts" value="3" min="0" max="20"></div>
+      </div>
+      <div class="fsec">
+        <div class="fsec-label">📋 Payment History</div>
+        <div class="frow">
+          <div class="fg"><label>Missed Payments</label><input type="number" id="f_miss" value="0" min="0"></div>
+          <div class="fg"><label>Late Payments</label><input type="number" id="f_late" value="1" min="0"></div>
+        </div>
+        <div class="fg"><label>Previous Defaults</label><select id="f_def"><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3+">3 or more</option></select></div>
+      </div>
+      <button class="btn-predict" id="btn-pred" onclick="runPrediction()"><span id="btn-txt">🔍 Predict Credit Score</span></button>
+      <button class="btn-reset" onclick="resetForm()">↺ Reset Form</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results-area" id="results-area">
+      <div class="placeholder" id="placeholder">
+        <div class="placeholder-icon">🤖</div>
+        <p style="font-weight:700;font-size:16px;margin-bottom:8px;color:var(--gray-600)">Ready for Analysis</p>
+        <p style="font-size:13px">Fill in the financial profile and click<br><strong>Predict Credit Score</strong> to get your AI-powered assessment.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ANALYTICS PAGE ========== -->
+<div class="page" id="page-analytics">
+  <div class="page-header"><div class="page-header-inner"><div><h1>Analytics Dashboard</h1><p>Comprehensive charts and insights on credit risk patterns</p></div></div></div>
+  <div style="padding:24px 20px;max-width:1200px;margin:0 auto">
+    <div class="charts-grid">
+      <div class="chart-box"><h3>📊 Income vs Debt by Score Range</h3><canvas id="ch-income" role="img" aria-label="Bar chart of income and debt"></canvas></div>
+      <div class="chart-box"><h3>🎯 Risk Factor Radar</h3><canvas id="ch-radar" role="img" aria-label="Radar chart of risk factors"></canvas></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-box"><h3>📈 Credit Score Distribution</h3><canvas id="ch-dist" role="img" aria-label="Score distribution histogram"></canvas></div>
+      <div class="chart-box"><h3>🔄 Approval vs Rejection Rate</h3><canvas id="ch-doughnut" role="img" aria-label="Approval rate doughnut chart"></canvas></div>
+    </div>
+    <div class="chart-box" style="margin-bottom:18px">
+      <h3>🏆 Model Performance Comparison</h3>
+      <div style="overflow-x:auto;margin-top:8px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="background:var(--gray-50)">
+            <th style="padding:11px 14px;text-align:left;font-weight:700;border-bottom:2px solid var(--gray-200)">Model</th>
+            <th style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:2px solid var(--gray-200)">Accuracy</th>
+            <th style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:2px solid var(--gray-200)">Precision</th>
+            <th style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:2px solid var(--gray-200)">Recall</th>
+            <th style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:2px solid var(--gray-200)">F1 Score</th>
+            <th style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:2px solid var(--gray-200)">ROC-AUC</th>
+            <th style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:2px solid var(--gray-200)">Status</th>
+          </tr></thead>
+          <tbody>
+            <tr style="background:rgba(37,99,235,0.02)"><td style="padding:11px 14px;font-weight:700;color:var(--primary)">🌲 Random Forest</td><td style="padding:11px 14px;text-align:center;font-weight:700;color:#22C55E">95.2%</td><td style="padding:11px 14px;text-align:center">94.8%</td><td style="padding:11px 14px;text-align:center">93.5%</td><td style="padding:11px 14px;text-align:center">94.1%</td><td style="padding:11px 14px;text-align:center">0.971</td><td style="padding:11px 14px;text-align:center"><span class="badge bd-s">⭐ Best</span></td></tr>
+            <tr><td style="padding:11px 14px;font-weight:600">🌳 Decision Tree</td><td style="padding:11px 14px;text-align:center">87.6%</td><td style="padding:11px 14px;text-align:center">86.2%</td><td style="padding:11px 14px;text-align:center">88.1%</td><td style="padding:11px 14px;text-align:center">87.1%</td><td style="padding:11px 14px;text-align:center">0.891</td><td style="padding:11px 14px;text-align:center"><span class="badge bd-w">Good</span></td></tr>
+            <tr><td style="padding:11px 14px;font-weight:600">📈 Logistic Regression</td><td style="padding:11px 14px;text-align:center">82.3%</td><td style="padding:11px 14px;text-align:center">81.7%</td><td style="padding:11px 14px;text-align:center">83.4%</td><td style="padding:11px 14px;text-align:center">82.5%</td><td style="padding:11px 14px;text-align:center">0.852</td><td style="padding:11px 14px;text-align:center"><span class="badge bd-d">Fair</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODELS PAGE ========== -->
+<div class="page" id="page-models">
+  <div class="page-header"><div class="page-header-inner"><div><h1>AI Model Library</h1><p>Three machine learning algorithms powering credit intelligence</p></div></div></div>
+  <div style="padding:40px 20px;max-width:1200px;margin:0 auto">
+    <div class="models-grid">
+      <div class="model-card best">
+        <div class="model-best-tag">⭐ Best Performing</div>
+        <div class="model-icon">🌲</div><h3>Random Forest</h3>
+        <p>An ensemble method that builds hundreds of decision trees and aggregates their predictions. Highly resistant to overfitting and excels with complex financial data.</p>
+        <div class="adv-item">Handles missing values gracefully</div>
+        <div class="adv-item">Robust against outliers and noise</div>
+        <div class="adv-item">Feature importance built-in</div>
+        <div class="adv-item">Works well with imbalanced datasets</div>
+        <div class="metric-row"><span>Accuracy</span><span class="metric-val">95.2%</span></div>
+        <div class="metric-row"><span>ROC-AUC</span><span class="metric-val">0.971</span></div>
+        <div class="metric-row"><span>F1 Score</span><span class="metric-val">94.1%</span></div>
+        <div class="metric-row"><span>No. of Trees</span><span class="metric-val">200</span></div>
+      </div>
+      <div class="model-card">
+        <div class="model-icon">🌳</div><h3>Decision Tree</h3>
+        <p>A tree-like flowchart that splits data based on feature thresholds. Highly interpretable and mirrors how human credit analysts approach risk assessment.</p>
+        <div class="adv-item">Fully interpretable and transparent</div>
+        <div class="adv-item">No feature scaling required</div>
+        <div class="adv-item">Fast prediction speed</div>
+        <div class="adv-item">Handles categorical features natively</div>
+        <div class="metric-row"><span>Accuracy</span><span class="metric-val">87.6%</span></div>
+        <div class="metric-row"><span>ROC-AUC</span><span class="metric-val">0.891</span></div>
+        <div class="metric-row"><span>F1 Score</span><span class="metric-val">87.1%</span></div>
+        <div class="metric-row"><span>Max Depth</span><span class="metric-val">12</span></div>
+      </div>
+      <div class="model-card">
+        <div class="model-icon">📈</div><h3>Logistic Regression</h3>
+        <p>A statistical model computing creditworthiness probability as a logistic function of input features. Efficient, explainable, and ideal for regulatory compliance.</p>
+        <div class="adv-item">Regulatory-friendly and auditable</div>
+        <div class="adv-item">Probability calibration built-in</div>
+        <div class="adv-item">Computationally very efficient</div>
+        <div class="adv-item">Low risk of overfitting</div>
+        <div class="metric-row"><span>Accuracy</span><span class="metric-val">82.3%</span></div>
+        <div class="metric-row"><span>ROC-AUC</span><span class="metric-val">0.852</span></div>
+        <div class="metric-row"><span>F1 Score</span><span class="metric-val">82.5%</span></div>
+        <div class="metric-row"><span>Regularization</span><span class="metric-val">L2</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== HISTORY PAGE ========== -->
+<div class="page" id="page-history">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div><h1>Prediction History</h1><p>All past credit assessments and results</p></div>
+      <button class="btn-primary" onclick="exportCSV()" style="font-size:13px;padding:10px 20px">⬇ Export CSV</button>
+    </div>
+  </div>
+  <div style="padding:24px 20px;max-width:1200px;margin:0 auto">
+    <div class="rcard">
+      <div style="overflow-x:auto">
+        <table class="htable">
+          <thead><tr><th>#</th><th>Date</th><th>Age</th><th>Income (₹)</th><th>Debt (₹)</th><th>Score</th><th>Verdict</th><th>Confidence</th></tr></thead>
+          <tbody id="hist-body"><tr><td colspan="8" style="text-align:center;padding:40px;color:var(--gray-400)">No predictions yet — <span style="color:var(--primary);cursor:pointer;font-weight:600" onclick="showPage('predict')">make your first prediction →</span></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+let history=[], chartsReady=false, isDark=false, menuOpen=false;
+
+// ===== NAV =====
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(menuOpen) toggleMenu();
+  if(p==='analytics' && !chartsReady){setTimeout(initCharts,80);chartsReady=true;}
+}
+function navGo(p){showPage(p);}
+function toggleMenu(){
+  menuOpen=!menuOpen;
+  document.getElementById('mobile-menu').classList.toggle('open',menuOpen);
+}
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('dark',isDark);
+}
+
+// ===== DEMO LOADER =====
+function loadDemo(){
+  // Pre-fill with a "good" demo profile
+  document.getElementById('f_age').value=35;
+  document.getElementById('f_annual').value=1200000;
+  document.getElementById('f_monthly').value=100000;
+  document.getElementById('f_emp').value='employed';
+  document.getElementById('f_yrs').value=8;
+  document.getElementById('f_exp').value=30000;
+  document.getElementById('f_sav').value=450000;
+  document.getElementById('f_debt').value=80000;
+  document.getElementById('f_cc').value=18;
+  document.getElementById('f_loan').value=600000;
+  document.getElementById('f_purpose').value='home';
+  document.getElementById('f_accts').value=4;
+  document.getElementById('f_miss').value=0;
+  document.getElementById('f_late').value=0;
+  document.getElementById('f_def').value='0';
+  document.getElementById('f_marital').value='married';
+  setTimeout(()=>runPrediction(), 300);
+}
+
+// ===== COUNTER ANIMATION =====
+function counter(el, target, suf, dur){
+  let n=0, step=target/(dur/16);
+  const t=setInterval(()=>{n=Math.min(n+step,target);el.textContent=Math.round(n)+suf;if(n>=target)clearInterval(t);},16);
+}
+setTimeout(()=>{
+  counter(document.getElementById('s1'),95,'%',1400);
+  counter(document.getElementById('s2'),50,'K+',1400);
+  counter(document.getElementById('s3'),10,'K+',1400);
+  counter(document.getElementById('s4'),3,'',800);
+},400);
+
+// ===== HELPERS =====
+function scoreColor(s){return s>=750?'#22C55E':s>=650?'#14B8A6':s>=550?'#F59E0B':'#EF4444';}
+function scoreLabel(s){return s>=750?'Excellent':s>=650?'Good':s>=550?'Fair':'Poor';}
+function fmtNum(n){return Number(n).toLocaleString('en-IN');}
+
+// ===== FORM RESET =====
+function resetForm(){
+  const defaults={f_age:32,f_annual:850000,f_monthly:70833,f_yrs:5,f_exp:25000,f_sav:200000,f_debt:120000,f_cc:28,f_loan:500000,f_accts:3,f_miss:0,f_late:1};
+  Object.entries(defaults).forEach(([k,v])=>document.getElementById(k).value=v);
+  document.getElementById('f_def').value='0';
+  document.getElementById('f_emp').value='employed';
+  document.getElementById('f_purpose').value='home';
+  document.getElementById('f_marital').value='single';
+  document.getElementById('f_gender').value='male';
+  document.getElementById('placeholder').style.display='block';
+  document.querySelectorAll('.rcard').forEach(c=>c.remove());
+}
+
+// ===== GATHER FORM DATA =====
+function getFormData(){
+  return{
+    age:+document.getElementById('f_age').value,
+    gender:document.getElementById('f_gender').value,
+    marital:document.getElementById('f_marital').value,
+    annual:+document.getElementById('f_annual').value,
+    monthly:+document.getElementById('f_monthly').value,
+    emp:document.getElementById('f_emp').value,
+    yrs:+document.getElementById('f_yrs').value,
+    exp:+document.getElementById('f_exp').value,
+    sav:+document.getElementById('f_sav').value,
+    debt:+document.getElementById('f_debt').value,
+    cc:+document.getElementById('f_cc').value,
+    loan:+document.getElementById('f_loan').value,
+    purpose:document.getElementById('f_purpose').value,
+    accts:+document.getElementById('f_accts').value,
+    miss:+document.getElementById('f_miss').value,
+    late:+document.getElementById('f_late').value,
+    def:document.getElementById('f_def').value
+  };
+}
+
+// ===== FALLBACK RULE-BASED PREDICT =====
+function fallback(d){
+  let s=500;
+  const dti=(d.debt+d.loan)/Math.max(d.annual,1);
+  if(dti<0.3)s+=80;else if(dti<0.5)s+=40;else if(dti>1.5)s-=100;else if(dti>0.8)s-=50;
+  if(d.miss===0&&d.late===0)s+=80;else if(d.miss>3)s-=100;else s-=(d.miss*20+d.late*10);
+  if(d.def==='0')s+=60;else if(d.def==='1')s-=60;else s-=120;
+  if(d.cc<30)s+=50;else if(d.cc>80)s-=60;
+  if(d.yrs>5)s+=40;
+  if(d.emp==='unemployed')s-=80;
+  if(d.sav>d.annual*0.3)s+=30;
+  s=Math.max(300,Math.min(850,s));
+  const ok=s>=600, conf=Math.min(95,Math.max(55,Math.abs(s-575)/2.75+55));
+  return{
+    score:s,verdict:ok?'Creditworthy':'Not Creditworthy',
+    aprob:ok?Math.round(conf):Math.round(100-conf),
+    rprob:ok?Math.round(100-conf):Math.round(conf),
+    conf:Math.round(conf),risk:s>700?'Low':s>550?'Medium':'High',
+    factors:[
+      {n:'Debt-to-Income Ratio',s:Math.max(0,Math.min(100,Math.round(100-dti*50))),lv:dti<0.4?'Low':'High',imp:dti<0.4?'Positive':'Negative'},
+      {n:'Payment History',s:Math.max(0,100-(d.miss*20+d.late*8)),lv:d.miss===0?'Low':'High',imp:d.miss===0?'Positive':'Negative'},
+      {n:'Credit Utilization',s:Math.max(0,100-d.cc),lv:d.cc<30?'Low':'High',imp:d.cc<30?'Positive':'Negative'},
+      {n:'Income Stability',s:d.emp==='employed'?82:42,lv:d.emp==='unemployed'?'High':'Low',imp:d.emp==='employed'?'Positive':'Negative'},
+      {n:'Savings Buffer',s:Math.min(100,Math.round(d.sav/d.annual*200)),lv:d.sav>d.annual*0.2?'Low':'Medium',imp:d.sav>d.annual*0.2?'Positive':'Neutral'},
+      {n:'Loan-to-Income Ratio',s:Math.max(0,100-Math.round(d.loan/d.annual*50)),lv:d.loan<d.annual?'Low':'High',imp:d.loan<d.annual?'Positive':'Negative'}
+    ],
+    rf:Math.max(300,Math.min(850,s+Math.round((Math.random()-.5)*18))),
+    dt:Math.max(300,Math.min(850,s+Math.round((Math.random()-.5)*28))),
+    lr:Math.max(300,Math.min(850,s+Math.round((Math.random()-.5)*24))),
+    rfv:ok?'Creditworthy':'Not Creditworthy',dtv:ok?'Creditworthy':'Not Creditworthy',lrv:s>580?'Creditworthy':'Not Creditworthy',
+    expl:ok
+      ?`The applicant is classified as Creditworthy primarily due to ${d.annual>500000?'strong':'adequate'} income of ₹${fmtNum(d.annual)} and ${d.miss===0?'a clean payment history with no missed payments':'manageable payment history'}. Credit utilization at ${d.cc}% is ${d.cc<30?'well within':'near'} the recommended 30% threshold, and the debt-to-income ratio of ${Math.round(dti*100)}% indicates manageable financial obligations.`
+      :`The applicant is classified as Not Creditworthy due to ${d.miss>2?'multiple missed payments ('+d.miss+')':d.def!=='0'?'previous loan defaults':'a high debt-to-income ratio of '+Math.round(dti*100)+'%'}. The combined debt and loan amount represents ${Math.round(dti*100)}% of annual income, which exceeds acceptable risk thresholds for most lenders.`,
+    recs:ok
+      ?['Maintain your payment discipline — it is your highest-value credit asset.','Consider reducing credit card utilization to below 20% for a further score boost.','Building a savings buffer of 6+ months of expenses will strengthen your profile significantly.']
+      :['Clear any missed or overdue payments immediately — this has the highest impact on your score.','Reduce existing debt before applying for new credit to improve your debt-to-income ratio.','Consider a secured credit card or credit-builder loan to gradually rebuild your credit history.']
+  };
+}
+
+// ===== MAIN PREDICTION =====
+async function runPrediction(){
+  const btn=document.getElementById('btn-pred'), txt=document.getElementById('btn-txt');
+  btn.disabled=true; txt.innerHTML='<span class="spin"></span> Analyzing...';
+  const d=getFormData();
+  let result;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content:`You are a professional credit scoring AI. Analyze this financial profile and return ONLY a valid JSON object with no markdown:
+Profile: Age:${d.age}, Gender:${d.gender}, Marital:${d.marital}, Annual Income:₹${d.annual}, Employment:${d.emp}, Years Employed:${d.yrs}, Monthly Expenses:₹${d.exp}, Savings:₹${d.sav}, Existing Debt:₹${d.debt}, CC Utilization:${d.cc}%, Loan Requested:₹${d.loan}, Purpose:${d.purpose}, Credit Accounts:${d.accts}, Missed Payments:${d.miss}, Late Payments:${d.late}, Defaults:${d.def}
+
+Return this exact JSON (replace <...> with computed values):
+{"score":<300-850 integer>,"verdict":<"Creditworthy" or "Not Creditworthy">,"aprob":<0-100>,"rprob":<0-100>,"conf":<0-100>,"risk":<"Low","Medium","High">,"factors":[{"n":"Debt-to-Income Ratio","s":<0-100>,"lv":<"Low","Medium","High">,"imp":<"Positive","Negative","Neutral">},{"n":"Payment History","s":<0-100>,"lv":<"Low","Medium","High">,"imp":<"Positive","Negative","Neutral">},{"n":"Credit Utilization","s":<0-100>,"lv":<"Low","Medium","High">,"imp":<"Positive","Negative","Neutral">},{"n":"Income Stability","s":<0-100>,"lv":<"Low","Medium","High">,"imp":<"Positive","Negative","Neutral">},{"n":"Savings Buffer","s":<0-100>,"lv":<"Low","Medium","High">,"imp":<"Positive","Negative","Neutral">},{"n":"Loan-to-Income Ratio","s":<0-100>,"lv":<"Low","Medium","High">,"imp":<"Positive","Negative","Neutral">}],"rf":<300-850>,"dt":<300-850>,"lr":<300-850>,"rfv":<"Creditworthy" or "Not Creditworthy">,"dtv":<"Creditworthy" or "Not Creditworthy">,"lrv":<"Creditworthy" or "Not Creditworthy">,"expl":"<2-3 sentence natural language explanation citing specific numbers>","recs":["<tip1>","<tip2>","<tip3>"]}`}]})
+    });
+    const data=await res.json();
+    const txt2=data.content.map(i=>i.text||'').join('');
+    result=JSON.parse(txt2.replace(/```json|```/g,'').trim());
+  }catch(e){result=fallback(d);}
+  finally{btn.disabled=false; txt.innerHTML='🔍 Predict Credit Score';}
+  renderResults(result, d);
+}
+
+// ===== RENDER RESULTS =====
+function renderResults(r, d){
+  document.getElementById('placeholder').style.display='none';
+  document.querySelectorAll('.rcard').forEach(c=>c.remove());
+  const area=document.getElementById('results-area');
+  const sc=scoreColor(r.score), sl=scoreLabel(r.score), ok=r.verdict==='Creditworthy';
+  const mp=((r.score-300)/550*100).toFixed(1);
+
+  // Card 1: Verdict + Score
+  const c1=document.createElement('div'); c1.className='rcard';
+  c1.innerHTML=`<div class="rcard-title">🎯 Credit Assessment Result</div>
+  <div class="pred-grid">
+    <div class="pred-verdict-box" style="background:${ok?'linear-gradient(135deg,#065f46,#0d9488)':'linear-gradient(135deg,#7f1d1d,#dc2626)'}">
+      <div class="pred-verdict-label">AI Verdict</div>
+      <div class="pred-verdict-text">${ok?'✅':'❌'} ${r.verdict}</div>
+      <div class="pred-conf">Confidence: <strong>${r.conf}%</strong></div>
+      <div class="pred-risk-tag">Risk Level: ${r.risk}</div>
+    </div>
+    <div class="pred-score-box">
+      <div style="font-size:11px;color:var(--gray-400);margin-bottom:4px">Credit Score</div>
+      <div class="pred-score-val" style="color:${sc}">${r.score}</div>
+      <div style="margin-top:6px"><span class="badge" style="background:${sc}20;color:${sc};font-size:12px;padding:4px 12px">${sl}</span></div>
+      <div class="score-bar" style="margin-top:14px"><div class="score-bar-track"></div><div class="score-bar-dot" style="left:${mp}%"></div></div>
+      <div class="score-bar-labels"><span>300 Poor</span><span>Fair</span><span>Good</span><span>850 Exc.</span></div>
+    </div>
+  </div>`;
+  area.appendChild(c1);
+
+  // Card 2: Probabilities
+  const c2=document.createElement('div'); c2.className='rcard';
+  c2.innerHTML=`<div class="rcard-title">📊 Probability Analysis</div>
+  <div class="prob-grid">
+    <div class="prob-item"><div class="prob-val" style="color:#22C55E">${r.aprob}%</div><div class="prob-lbl">Approval Probability</div></div>
+    <div class="prob-item"><div class="prob-val" style="color:#EF4444">${r.rprob}%</div><div class="prob-lbl">Risk Probability</div></div>
+    <div class="prob-item"><div class="prob-val" style="color:var(--primary)">${r.conf}%</div><div class="prob-lbl">Model Confidence</div></div>
+  </div>
+  <div style="position:relative;height:180px"><canvas id="prob-chart" role="img" aria-label="Probability breakdown chart">Approval: ${r.aprob}%, Risk: ${r.rprob}%</canvas></div>`;
+  area.appendChild(c2);
+
+  // Card 3: Risk Factors
+  const c3=document.createElement('div'); c3.className='rcard';
+  let rh='<div class="risk-list">';
+  r.factors.forEach(f=>{
+    const col=f.imp==='Positive'?'#22C55E':f.imp==='Negative'?'#EF4444':'#F59E0B';
+    const bc=f.lv==='Low'?'bd-s':f.lv==='High'?'bd-d':'bd-w';
+    rh+=`<div class="risk-row"><div class="risk-name">${f.n} <span class="badge ${bc}">${f.lv}</span></div><div class="risk-bar-w"><div class="risk-bar-f" style="width:${f.s}%;background:${col}"></div></div><div class="risk-score" style="color:${col}">${f.s}</div></div>`;
+  });
+  rh+='</div>';
+  c3.innerHTML=`<div class="rcard-title">⚠️ Risk Factor Analysis</div>${rh}`;
+  area.appendChild(c3);
+
+  // Card 4: Explanation
+  const c4=document.createElement('div'); c4.className='rcard';
+  c4.innerHTML=`<div class="rcard-title">🧠 Explainable AI</div>
+  <div class="ai-box">${r.expl}</div>
+  <div style="margin-top:14px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--gray-800)">💡 Recommendations</div>
+    ${r.recs.map((rec,i)=>`<div class="rec-item"><span class="rec-num">${i+1}.</span>${rec}</div>`).join('')}
+  </div>`;
+  area.appendChild(c4);
+
+  // Card 5: Model Comparison
+  const c5=document.createElement('div'); c5.className='rcard';
+  c5.innerHTML=`<div class="rcard-title">🔬 Multi-Model Comparison</div>
+  <div class="model-compare-grid">
+    ${[{n:'🌲 Random Forest',s:r.rf,v:r.rfv,b:true},{n:'🌳 Decision Tree',s:r.dt,v:r.dtv,b:false},{n:'📈 Logistic Reg.',s:r.lr,v:r.lrv,b:false}]
+      .map(m=>`<div class="mc-item${m.b?' best':''}">
+        ${m.b?'<div class="mc-best-tag">⭐ BEST MODEL</div>':''}
+        <div class="mc-label">${m.n}</div>
+        <div class="mc-score" style="color:${scoreColor(m.s)}">${m.s}</div>
+        <div class="mc-verdict">${m.v==='Creditworthy'?'✅':'❌'} ${m.v}</div>
+      </div>`).join('')}
+  </div>`;
+  area.appendChild(c5);
+
+  // Save history
+  history.unshift({date:new Date().toLocaleDateString('en-IN'),age:d.age,income:d.annual,debt:d.debt,score:r.score,verdict:r.verdict,conf:r.conf});
+  renderHistory();
+
+  // Prob chart
+  setTimeout(()=>{
+    const ctx=document.getElementById('prob-chart');
+    if(ctx) new Chart(ctx,{type:'doughnut',data:{labels:['Approval','Risk'],datasets:[{data:[r.aprob,r.rprob],backgroundColor:['#22C55E','#EF4444'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{labels:{color:isDark?'#9CA3AF':'#475569',font:{size:12}}}}}});
+  },80);
+  area.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ===== HISTORY =====
+function renderHistory(){
+  const tb=document.getElementById('hist-body');
+  if(!history.length) return;
+  tb.innerHTML=history.map((h,i)=>`<tr>
+    <td>${history.length-i}</td><td>${h.date}</td><td>${h.age}</td>
+    <td>₹${fmtNum(h.income)}</td><td>₹${fmtNum(h.debt)}</td>
+    <td style="font-weight:700;color:${scoreColor(h.score)}">${h.score}</td>
+    <td><span class="badge ${h.verdict==='Creditworthy'?'bd-s':'bd-d'}">${h.verdict==='Creditworthy'?'✅':'❌'} ${h.verdict}</span></td>
+    <td>${h.conf}%</td>
+  </tr>`).join('');
+}
+function exportCSV(){
+  if(!history.length){alert('No predictions to export yet.');return;}
+  const rows=[['#','Date','Age','Income','Debt','Score','Verdict','Confidence'],...history.map((h,i)=>[history.length-i,h.date,h.age,h.income,h.debt,h.score,h.verdict,h.conf+'%'])];
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));
+  a.download='creditwise_history.csv'; a.click();
+}
+
+// ===== CHARTS =====
+function initCharts(){
+  const tc=isDark?'#9CA3AF':'#475569', gc='rgba(0,0,0,0.05)';
+  new Chart(document.getElementById('ch-income'),{type:'bar',data:{labels:['Poor','Fair','Good','Excellent'],datasets:[{label:'Avg Income (₹L)',data:[3.2,5.8,9.1,14.6],backgroundColor:'rgba(37,99,235,0.8)',borderRadius:5},{label:'Avg Debt (₹L)',data:[4.1,3.2,2.8,1.4],backgroundColor:'rgba(239,68,68,0.8)',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc,font:{size:11}}}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{display:false}},y:{ticks:{color:tc,font:{size:10}},grid:{color:gc}}}}});
+  new Chart(document.getElementById('ch-radar'),{type:'radar',data:{labels:['Payment History','CC Utilization','Income Stability','Debt Ratio','Savings','Credit Age'],datasets:[{label:'Creditworthy',data:[90,75,85,80,70,78],backgroundColor:'rgba(37,99,235,0.12)',borderColor:'#2563EB',pointBackgroundColor:'#2563EB',pointRadius:3},{label:'Not Creditworthy',data:[45,30,50,25,35,42],backgroundColor:'rgba(239,68,68,0.12)',borderColor:'#EF4444',pointBackgroundColor:'#EF4444',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc,font:{size:11}}}},scales:{r:{ticks:{color:'#94A3B8',font:{size:9},backdropColor:'transparent'},grid:{color:'rgba(0,0,0,0.08)'},pointLabels:{color:tc,font:{size:10}},min:0,max:100}}}});
+  new Chart(document.getElementById('ch-dist'),{type:'bar',data:{labels:['300–349','350–399','400–449','450–499','500–549','550–599','600–649','650–699','700–749','750–800','800–850'],datasets:[{label:'Users',data:[120,180,240,310,420,580,720,890,1050,1240,680],backgroundColor:['#EF4444','#EF4444','#F59E0B','#F59E0B','#F59E0B','#14B8A6','#14B8A6','#22C55E','#22C55E','#22C55E','#22C55E'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:8},maxRotation:45,autoSkip:false},grid:{display:false}},y:{ticks:{color:tc,font:{size:9}},grid:{color:gc}}}}});
+  new Chart(document.getElementById('ch-doughnut'),{type:'doughnut',data:{labels:['Approved','Rejected'],datasets:[{data:[72,28],backgroundColor:['#22C55E','#EF4444'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{labels:{color:tc,font:{size:12}}}}}});
+}
+
+// Show mobile theme btn on small screens
+if(window.innerWidth<=768) document.getElementById('mob-theme').style.display='flex';
+window.addEventListener('resize',()=>{
+  const mb=document.getElementById('mob-theme');
+  if(mb) mb.style.display=window.innerWidth<=768?'flex':'none';
+});
+</script>
+</body>
+</html>

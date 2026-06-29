@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History – CreditWise AI</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><div class="logo-icon">CW</div><span>CreditWise AI</span></a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">&#9776;</button>
+    <div class="nav-links" id="nav-links">
+      <a href="index.html" class="nav-btn ghost">Home</a>
+      <a href="predict.html" class="nav-btn ghost">Predict</a>
+      <a href="analytics.html" class="nav-btn ghost">Analytics</a>
+      <a href="models.html" class="nav-btn ghost">Models</a>
+      <a href="history.html" class="nav-btn ghost active">History</a>
+      <button class="theme-btn" onclick="toggleTheme()">🌓</button>
+      <a href="predict.html" class="nav-btn primary">Get Started →</a>
+    </div>
+  </div>
+</nav>
+<div class="page-header">
+  <div class="page-header-inner">
+    <div><h1>📋 Prediction History</h1><p>All past credit assessments stored locally in your browser</p></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-predict" style="width:auto;padding:10px 20px;font-size:14px" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn-reset" style="width:auto;padding:10px 20px" onclick="clearHistory()">🗑 Clear All</button>
+    </div>
+  </div>
+</div>
+<div style="padding:24px;max-width:1200px;margin:0 auto">
+  <div id="stats-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px"></div>
+  <div class="result-card">
+    <div style="overflow-x:auto">
+      <table class="history-table" id="history-table">
+        <thead><tr><th>#</th><th>Date</th><th>Age</th><th>Annual Income (₹)</th><th>Existing Debt (₹)</th><th>Credit Score</th><th>Verdict</th><th>Confidence</th></tr></thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="theme.js"></script>
+<script>
+function getScoreColor(s){return s>=750?'#22C55E':s>=650?'#14B8A6':s>=550?'#F59E0B':'#EF4444';}
+function loadHistory(){
+  const hist=JSON.parse(localStorage.getItem('cw-history')||'[]');
+  const tbody=document.getElementById('history-tbody');
+  const statsRow=document.getElementById('stats-row');
+  if(!hist.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:48px;color:var(--gray-400)">No predictions yet. <a href="predict.html" style="color:var(--primary)">Make your first prediction →</a></td></tr>';
+    statsRow.innerHTML='';
+    return;
+  }
+  const avg=Math.round(hist.reduce((a,h)=>a+h.score,0)/hist.length);
+  const creditworthy=hist.filter(h=>h.verdict==='Creditworthy').length;
+  statsRow.innerHTML=[
+    {label:'Total Predictions',val:hist.length,col:'var(--primary)'},
+    {label:'Creditworthy',val:creditworthy,col:'#22C55E'},
+    {label:'Not Creditworthy',val:hist.length-creditworthy,col:'#EF4444'},
+    {label:'Avg Credit Score',val:avg,col:getScoreColor(avg)}
+  ].map(s=>`<div style="background:var(--white);border:1px solid var(--gray-200);border-radius:12px;padding:20px;text-align:center"><div style="font-size:32px;font-weight:800;color:${s.col}">${s.val}</div><div style="font-size:13px;color:var(--gray-600);margin-top:4px">${s.label}</div></div>`).join('');
+  tbody.innerHTML=hist.map((h,i)=>`<tr>
+    <td>${hist.length-i}</td>
+    <td>${h.date}</td>
+    <td>${h.age}</td>
+    <td>₹${Number(h.income).toLocaleString('en-IN')}</td>
+    <td>₹${Number(h.debt).toLocaleString('en-IN')}</td>
+    <td style="font-weight:700;color:${getScoreColor(h.score)}">${h.score}</td>
+    <td><span class="badge ${h.verdict==='Creditworthy'?'badge-success':'badge-danger'}">${h.verdict==='Creditworthy'?'✅':'❌'} ${h.verdict}</span></td>
+    <td>${h.confidence}%</td>
+  </tr>`).join('');
+}
+function exportCSV(){
+  const hist=JSON.parse(localStorage.getItem('cw-history')||'[]');
+  if(!hist.length){alert('No predictions to export yet.');return;}
+  const hdr=['#','Date','Age','Income','Debt','Score','Verdict','Confidence'];
+  const rows=hist.map((h,i)=>[hist.length-i,h.date,h.age,h.income,h.debt,h.score,h.verdict,h.confidence+'%']);
+  const csv=[hdr,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='creditwise_history.csv';a.click();
+}
+function clearHistory(){
+  if(confirm('Clear all prediction history? This cannot be undone.')){
+    localStorage.removeItem('cw-history');loadHistory();
+  }
+}
+loadHistory();
+</script>
+</body>
+</html>
